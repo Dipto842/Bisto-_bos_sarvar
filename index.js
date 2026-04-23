@@ -18,7 +18,8 @@ app.use(cors({
     "https://bisto-wine.vercel.app",
     "https://bisto-bos.web.app"
   ],
-  credentials: true
+  credentials: true,
+   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
 }));
 
 app.options("*", cors());
@@ -144,7 +145,7 @@ if (!authHeader) {
 
     app.post('/users', async (req, res) => {
       const user = req.body
-      const query = { email: user.email }
+      const query = { email: user?.email }
       const rejsr = await usersitem.findOne(query)
       if (rejsr) {
         return res.send({ message: 'user already add', insertedId: null })
