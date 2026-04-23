@@ -14,7 +14,9 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const allowedOrigins = [
   "http://localhost:5173",
   "https://bisto-wine.vercel.app",
-  "https://bisto-bos.web.app"
+  "https://bisto-bos.web.app",
+  'https://bisto-bos.firebaseapp.com',
+  'https://bisto-bos.web.app'
 ];
 
 const corsOptions = {
