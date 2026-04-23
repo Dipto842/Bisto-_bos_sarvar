@@ -14,12 +14,14 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 app.use(cors({
   origin: [
-    'http://localhost:5173',
-    'https://bisto-bos.web.app',
-    'https://bisto-bos.web.app'
+    "http://localhost:5173",
+    "https://bisto-wine.vercel.app",
+    "https://bisto-bos.web.app"
+  ],
+  credentials: true
+}));
 
-  ]
-}))
+app.options("*", cors());
 app.use(express.json())
 const jwt = require('jsonwebtoken');
 
