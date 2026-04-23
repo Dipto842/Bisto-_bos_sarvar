@@ -30,7 +30,8 @@ const corsOptions = {
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 };
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 const jwt = require('jsonwebtoken');
