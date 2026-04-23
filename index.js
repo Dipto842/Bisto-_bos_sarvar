@@ -11,16 +11,15 @@ const stripe = require('stripe')(process.env.SEKIRUTI_TOKEN)
 const port = process.env.PROT || 5000
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://bisto-wine.vercel.app",
+  "https://bisto-bos.web.app"
+];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      "http://localhost:5173",
-      "https://bisto-wine.vercel.app",
-      "https://bisto-bos.web.app"
-      
-    ];
-
+    // allow requests with no origin (like mobile apps or curl requests)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -28,9 +27,10 @@ const corsOptions = {
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  optionsSuccessStatus: 200 // কিছু পুরনো ব্রাউজারের জন্য জরুরি
 };
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
