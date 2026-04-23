@@ -43,6 +43,7 @@ async function run() {
 
     const databest = client.db('Boss').collection('Data')
     const criditem = client.db('Boss').collection('crid')
+    const bookingitem = client.db('Boss').collection('booking')
     const usersitem = client.db('Boss').collection('users')
     const userpayment = client.db('Boss').collection('payments')
 
@@ -51,7 +52,7 @@ async function run() {
     // JWT
     app.post('/jwt', (req, res) => {
       const user = req.body
-      const token = jwt.sign(user, process.env.ACCSS_TOKEN, {
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
         expiresIn: '1h'
       })
       res.send({ token })
@@ -61,14 +62,22 @@ async function run() {
 
     // verifytoken
 
+
     const verifytoken = (req, res, next) => {
+const authHeader = req.headers.authorization
+// console.log(authHeader , 'const authHeader = req.headers.authorization');
+
+if (!authHeader) {
+  return res.status(401).send({ message: "unauthorized" })
+}
 
       if (!req.headers.authorization) {
-        return res.status(404).send({ message: 'forbidden access' })
+        return res.status(404).send({ message: 'forbidden ' })
       }
-      const token = req.headers.authorization.split(' ')[1]
-      // console.log('new',req.headers.authorization)
-      jwt.verify(token, process.env.ACCSS_TOKEN, (err, decoded) => {
+
+      const token = authHeader.split(' ')[1]
+     
+      jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
         if (err) {
           return res.status(403).send({ message: 'forbidden access' })
         }
@@ -78,6 +87,8 @@ async function run() {
     }
     const verifiyadmin = async (req, res, next) => {
       const email = req.decoded.email
+      // console.log(email);
+      
       const query = { email: email }
       const user = await usersitem.findOne(query)
       const Admin = user?.role === 'admin'
@@ -99,7 +110,7 @@ async function run() {
 
 
     // addmin
-    app.patch('/users/addmin/:id', verifytoken, verifiyadmin, async (req, res) => {
+    app.patch('/users/admin/:id', verifytoken, verifiyadmin, async (req, res) => {
       const id = req.params.id
       const filtar = { _id: new ObjectId(id) }
       const Upretdog = {
@@ -112,8 +123,10 @@ async function run() {
     })
 
 
-    app.get('/users/addmin/:email', verifytoken, async (req, res) => {
+    app.get('/users/admin/:email', verifytoken, async (req, res) => {
       const email = req.params.email
+      // console.log(email,'email');
+      
       if (email !== req.decoded.email) {
         return res.status(403).send('Unauthorized access')
       }
@@ -152,9 +165,24 @@ async function run() {
       res.send(resule)
     })
 
+   app.post('/Mycrids', async (req, res) => {
+  try {
+    const email = req.body.email; // body থেকে email নেওয়া
+    
+
+    const query = { email };
+    const result = await criditem.find(query).toArray(); // MongoDB cursor → array
+
+    res.send(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ message: "Server error" });
+  }
+});
+
     app.post('/crids', async (req, res) => {
       const criditems = req.body
-      console.log(criditem);
+      // console.log(criditem);
       const resurl = await criditem.insertOne(criditems)
       res.send(resurl)
     })
@@ -174,13 +202,15 @@ async function run() {
 
     app.delete('/menu/:id', verifytoken, verifiyadmin, async (req, res) => {
       const itm = req.params.id
-      const query = { _id: itm }
+      const query = { _id: new ObjectId(itm) }
       const rejar = await databest.deleteOne(query)
       res.send(rejar)
     })
     app.get('/menu/:id', async (req, res) => {
       const id = req.params.id
-      const query = { _id: id }
+      
+      
+      const query = { _id: new ObjectId(id) }
       const resar = await databest.findOne(query)
 
       res.send(resar)
@@ -190,19 +220,38 @@ async function run() {
 
       const id = req.params.id
 
-      const query = { _id: id }
+      const query = { _id: new ObjectId(id) }
       const upretdoc = {
         $set: {
           name: item.name,
           category: item.category,
           price: item.price,
-          recipe: item.recipe
+          recipe: item.recipe,
+          discount: item.discount,
         }
       }
 
       const rejar = await databest.updateOne(query, upretdoc)
       res.send(rejar)
     })
+
+    //  discounde 
+    app.patch('/menu/discount/:id', async (req, res) => {
+      const item = req.body
+
+      const id = req.params.id
+
+
+      const query = { _id: new ObjectId(id) }
+      const upretdoc = {
+        $set: {
+          discount: item.discount,
+        }
+      }
+      const rejar = await databest.updateOne(query, upretdoc)
+      res.send(rejar)
+    })
+
     app.get('/menu', async (req, res) => {
       const rejar = await databest.find().toArray()
       res.send(rejar)
@@ -211,37 +260,51 @@ async function run() {
     
     // pememt
 
-    app.post('/payment', async(req,res)=>{
-      const body = req.body
+    // app.post('/payment', async(req,res)=>{
+    //   const body = req.body
      
-      const paymentrejart = await userpayment.insertOne(body)
-      console.log('pementinfo',body);
+     
+    //   const paymentrejart = await userpayment.insertOne(body)
+    //   // console.log('pementinfo',body);
       
-      const query = {_id:{
-        $in: body.cardId.map(id => new ObjectId(id))
-      }};
-      const deleteRejart = await criditem.deleteMany(query)
-      res.send({paymentrejart,deleteRejart}) 
+    //   const query = {_id:{
+    //     $in: body.cardId.map(id => new ObjectId(id))
+    //   }};
+    //   const deleteRejart = await criditem.deleteMany(query)
+    //   res.send({paymentrejart,deleteRejart}) 
       
-    })
+    // })
 
 
  
 
     app.post('/create_payment_intent', async (req, res) => {
-      const { price } = req.body;
-      const amount = parseInt(price * 100);
-      const paymentIntent = await stripe.paymentIntents.create({
+  try {
+    const price = Number(req.body.price || 0);
 
-        amount: amount,
-        currency: 'usd',
-        payment_method_types: ['card']
-      })
-      // console.log(amount)
-      res.send({
-        clientSecret: paymentIntent.client_secret
-      })
-    })
+    const amount = Math.round(price * 100);
+
+    if (!amount || amount < 50) {
+      return res.status(400).send({
+        message: "Minimum amount is $0.50"
+      });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'usd',
+      payment_method_types: ['card']
+    });
+
+    res.send({
+      clientSecret: paymentIntent.client_secret
+    });
+
+  } catch (error) {
+    console.error("Stripe error:", error);
+    res.status(500).send({ message: "Server error" });
+  }
+});
 
     app.get('/payment/:email', verifytoken, async(req,res)=>{
       const query = {email: req.params.email}
@@ -256,7 +319,7 @@ async function run() {
     app.get('/addminhom', async(req,res)=>{
 
       const user = await usersitem.estimatedDocumentCount()
-      const menuItem = await criditem.estimatedDocumentCount()
+      const menuItem = await databest.estimatedDocumentCount()
       const Odars = await userpayment.estimatedDocumentCount()
       const result = await userpayment.aggregate([
         {
@@ -319,6 +382,16 @@ res.send({
       res.send(resule)
     })
 
+    // bookingitem
+    app.post('/booking', async(req,res)=>{
+      const body = req.body
+      const resjar = await bookingitem.insertOne(body)
+      res.send(resjar)
+    })
+    app.get('/booking', async(req,res)=>{
+      const resjar = await bookingitem.find().toArray()
+      res.send(resjar)
+    })
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
