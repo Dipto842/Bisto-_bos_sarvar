@@ -18,6 +18,7 @@ const corsOptions = {
       "http://localhost:5173",
       "https://bisto-wine.vercel.app",
       "https://bisto-bos.web.app"
+      
     ];
 
     if (!origin || allowedOrigins.includes(origin)) {
