@@ -12,18 +12,27 @@ const port = process.env.PROT || 5000
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://bisto-wine.vercel.app",
-    "https://bisto-bos.web.app"
-  ],
-  credentials: true,
-   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
-}));
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "https://bisto-wine.vercel.app",
+      "https://bisto-bos.web.app"
+    ];
 
-app.options("*", cors());
-app.use(express.json())
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 const jwt = require('jsonwebtoken');
 
 
