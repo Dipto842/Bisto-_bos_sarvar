@@ -1,4 +1,4 @@
-const functions = require('firebase-functions'); // এটি যোগ করুন
+
 const express = require('express');
 const app = express();
 
@@ -437,5 +437,4 @@ app.listen(port, () => {
   console.log(`you are port,${port}`)
 })
 
-// app.listen(port, ...) এই অংশটি কমেন্ট করে দিন বা মুছে দিন
-exports.api = functions.https.onRequest(app);
+
