@@ -1,4 +1,4 @@
-
+const functions = require('firebase-functions'); // এটি যোগ করুন
 const express = require('express');
 const app = express();
 
@@ -276,20 +276,20 @@ if (!authHeader) {
     
     // pememt
 
-    // app.post('/payment', async(req,res)=>{
-    //   const body = req.body
+    app.post('/payment', async(req,res)=>{
+      const body = req.body
      
      
-    //   const paymentrejart = await userpayment.insertOne(body)
-    //   // console.log('pementinfo',body);
+      const paymentrejart = await userpayment.insertOne(body)
+      // console.log('pementinfo',body);
       
-    //   const query = {_id:{
-    //     $in: body.cardId.map(id => new ObjectId(id))
-    //   }};
-    //   const deleteRejart = await criditem.deleteMany(query)
-    //   res.send({paymentrejart,deleteRejart}) 
+      const query = {_id:{
+        $in: body.cardId.map(id => new ObjectId(id))
+      }};
+      const deleteRejart = await criditem.deleteMany(query)
+      res.send({paymentrejart,deleteRejart}) 
       
-    // })
+    })
 
 
  
@@ -436,3 +436,6 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`you are port,${port}`)
 })
+
+// app.listen(port, ...) এই অংশটি কমেন্ট করে দিন বা মুছে দিন
+exports.api = functions.https.onRequest(app);
